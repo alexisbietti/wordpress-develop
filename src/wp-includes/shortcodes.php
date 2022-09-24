@@ -258,12 +258,26 @@ function do_shortcode( $content, $ignore_html = false ) {
  * @param array $tagnames Optional. List of shortcodes to find. Defaults to all registered shortcodes.
  * @return string The shortcode search regular expression
  */
+$shortcode_regex_cache = array();
 function get_shortcode_regex( $tagnames = null ) {
 	global $shortcode_tags;
+	global $shortcode_regex_cache;
 
 	if ( empty( $tagnames ) ) {
 		$tagnames = array_keys( $shortcode_tags );
 	}
+
+	$key = implode('|', $tagnames);
+	if (array_key_exists($key, $shortcode_regex_cache)) {
+		return $shortcode_regex_cache[$key];
+	}
+
+	$regex = do_get_shortcode_regex( $tagnames );
+	$shortcode_regex_cache[$key] = $regex;
+	return $regex;
+}
+
+function do_get_shortcode_regex( $tagnames ) {
 	$tagregexp = implode( '|', array_map( 'preg_quote', $tagnames ) );
 
 	// WARNING! Do not change this regex without changing do_shortcode_tag() and strip_shortcode_tag().
