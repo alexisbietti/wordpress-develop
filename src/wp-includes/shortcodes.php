@@ -146,13 +146,16 @@ function shortcode_exists( $tag ) {
  * @param string $tag     Shortcode tag to check.
  * @return bool Whether the passed content contains the given shortcode.
  */
-function has_shortcode( $content, $tag ) {
+function has_shortcode( $content, $tag, $shortcode_regex = null ) {
 	if ( false === strpos( $content, '[' ) ) {
 		return false;
 	}
 
 	if ( shortcode_exists( $tag ) ) {
-		preg_match_all( '/' . get_shortcode_regex() . '/', $content, $matches, PREG_SET_ORDER );
+		if ($shortcode_regex == null) {
+			$shortcode_regex = '/' . get_shortcode_regex() . '/';
+		}
+		preg_match_all( $shortcode_regex, $content, $matches, PREG_SET_ORDER );
 		if ( empty( $matches ) ) {
 			return false;
 		}
@@ -160,7 +163,7 @@ function has_shortcode( $content, $tag ) {
 		foreach ( $matches as $shortcode ) {
 			if ( $tag === $shortcode[2] ) {
 				return true;
-			} elseif ( ! empty( $shortcode[5] ) && has_shortcode( $shortcode[5], $tag ) ) {
+			} elseif ( ! empty( $shortcode[5] ) && has_shortcode( $shortcode[5], $tag, $shortcode_regex ) ) {
 				return true;
 			}
 		}
